@@ -99,15 +99,15 @@ export interface DatabaseSelectorProps {
 }
 
 const SelectLabel = ({
-  backend,
-  databaseName,
-}: {
+                       backend,
+                       databaseName,
+                     }: {
   backend?: string;
   databaseName: string;
 }) => (
   <LabelStyle>
-    <Label className="backend">{backend || ''}</Label>
-    <span className="name" title={databaseName}>
+    <Label className='backend'>{backend || ''}</Label>
+    <span className='name' title={databaseName}>
       {databaseName}
     </span>
   </LabelStyle>
@@ -116,19 +116,19 @@ const SelectLabel = ({
 const EMPTY_SCHEMA_OPTIONS: SchemaOption[] = [];
 
 export default function DatabaseSelector({
-  db,
-  formMode = false,
-  emptyState,
-  getDbList,
-  handleError,
-  isDatabaseSelectEnabled = true,
-  onDbChange,
-  onEmptyResults,
-  onSchemaChange,
-  readOnly = false,
-  schema,
-  sqlLabMode = false,
-}: DatabaseSelectorProps) {
+                                           db,
+                                           formMode = false,
+                                           emptyState,
+                                           getDbList,
+                                           handleError,
+                                           isDatabaseSelectEnabled = true,
+                                           onDbChange,
+                                           onEmptyResults,
+                                           onSchemaChange,
+                                           readOnly = false,
+                                           schema,
+                                           sqlLabMode = false,
+                                         }: DatabaseSelectorProps) {
   const [currentDb, setCurrentDb] = useState<DatabaseValue | undefined>();
   const [currentSchema, setCurrentSchema] = useState<SchemaOption | undefined>(
     schema ? { label: schema, value: schema, title: schema } : undefined,
@@ -153,18 +153,41 @@ export default function DatabaseSelector({
           ...(formMode || !sqlLabMode
             ? { filters: [{ col: 'database_name', opr: 'ct', value: search }] }
             : {
-                filters: [
-                  { col: 'database_name', opr: 'ct', value: search },
-                  {
-                    col: 'expose_in_sqllab',
-                    opr: 'eq',
-                    value: true,
-                  },
-                ],
-              }),
+              filters: [
+                { col: 'database_name', opr: 'ct', value: search },
+                {
+                  col: 'expose_in_sqllab',
+                  opr: 'eq',
+                  value: true,
+                },
+              ],
+            }),
         });
         const endpoint = `/api/v1/database/?q=${queryParams}`;
-        return SupersetClient.get({ endpoint }).then(({ json }) => {
+        return SupersetClient.get({ endpoint }).then(async ({ json }) => {
+          /*todo kien call api list datasource project*/
+          const searchParams = new URLSearchParams(window.location.search);
+          const token = searchParams.get('token') || 'token';
+          const projectId = searchParams.get('projectId') || '123';
+          const apiUrl = searchParams.get('apiUrl');
+          const requestHeaders: HeadersInit = new Headers();
+          requestHeaders.set('Content-Type', 'application/json');
+          requestHeaders.set('Accept', 'application/json');
+          requestHeaders.set('Authorization', 'Bearer ' + token);
+          requestHeaders.set('projectId', projectId);
+          const responseDatasourceVmlp = await fetch(apiUrl + '/data-sources',
+            // const responseDatasourceVmlp = await fetch('http://localhost:8080/test',
+            {
+              method: 'GET', // *GET, POST, PUT, DELETE, etc.
+              mode: 'cors', // no-cors, *cors, same-origin
+              cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+              credentials: 'same-origin', // include, *same-origin, omit
+              headers: requestHeaders,
+              redirect: 'follow', // manual, *follow, error
+              referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+            });
+          const dataVmlp: any[] = await responseDatasourceVmlp.json();
+
           const { result } = json;
           if (getDbList) {
             getDbList(result);
@@ -172,7 +195,7 @@ export default function DatabaseSelector({
           if (result.length === 0) {
             if (onEmptyResults) onEmptyResults(search);
           }
-          const options = result.map((row: DatabaseObject) => ({
+          let options = result.filter((op: { id: any; }) => dataVmlp['data']?.some((d: { supersetId: any; }) => d.supersetId === op.id)).map((row: DatabaseObject) => ({
             label: (
               <SelectLabel
                 backend={row.backend}
@@ -184,7 +207,7 @@ export default function DatabaseSelector({
             database_name: row.database_name,
             backend: row.backend,
           }));
-
+          console.log('result', result);
           return {
             data: options,
             totalCount: options.length,
@@ -195,22 +218,24 @@ export default function DatabaseSelector({
   );
 
   useEffect(() => {
-    setCurrentDb(current =>
+
+    /*todo Kien cmt set database table schema null*/
+    /*setCurrentDb(current =>
       current?.id !== db?.id
         ? db
-          ? {
-              label: (
-                <SelectLabel
-                  backend={db.backend}
-                  databaseName={db.database_name}
-                />
-              ),
-              value: db.id,
-              ...db,
-            }
-          : undefined
+        ? {
+          label: (
+            <SelectLabel
+              backend={db.backend}
+              databaseName={db.database_name}
+            />
+          ),
+          value: db.id,
+          ...db,
+        }
+        : undefined
         : current,
-    );
+    );*/
   }, [db]);
 
   function changeSchema(schema: SchemaOption | undefined) {
@@ -258,9 +283,9 @@ export default function DatabaseSelector({
 
   function renderSelectRow(select: ReactNode, refreshBtn: ReactNode) {
     return (
-      <div className="section">
-        <span className="select">{select}</span>
-        <span className="refresh">{refreshBtn}</span>
+      <div className='section'>
+        <span className='select'>{select}</span>
+        <span className='refresh'>{refreshBtn}</span>
       </div>
     );
   }
@@ -270,7 +295,7 @@ export default function DatabaseSelector({
       <AsyncSelect
         ariaLabel={t('Select database or type to search databases')}
         optionFilterProps={['database_name', 'value']}
-        data-test="select-database"
+        data-test='select-database'
         header={<FormLabel>{t('Database')}</FormLabel>}
         lazyLoading={false}
         notFoundContent={emptyState}
@@ -298,7 +323,7 @@ export default function DatabaseSelector({
         header={<FormLabel>{t('Schema')}</FormLabel>}
         labelInValue
         loading={loadingSchemas}
-        name="select-schema"
+        name='select-schema'
         notFoundContent={t('No compatible schema found')}
         placeholder={t('Select schema or type to search schemas')}
         onChange={item => changeSchema(item as SchemaOption)}
@@ -311,7 +336,7 @@ export default function DatabaseSelector({
   }
 
   return (
-    <DatabaseSelectorWrapper data-test="DatabaseSelector">
+    <DatabaseSelectorWrapper data-test='DatabaseSelector'>
       {renderDatabaseSelect()}
       {renderSchemaSelect()}
     </DatabaseSelectorWrapper>

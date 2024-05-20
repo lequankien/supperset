@@ -516,6 +516,9 @@ if (isDevMode) {
       logging: 'error',
     },
     static: path.join(process.cwd(), '../static/assets'),
+    headers: {
+      'X-Frame-Options': 'SAMEORIGIN'
+    }
   };
 }
 

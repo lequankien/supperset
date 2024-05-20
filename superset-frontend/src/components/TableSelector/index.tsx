@@ -240,12 +240,13 @@ const TableSelector: FunctionComponent<TableSelectorProps> = ({
     selectedOptions: TableOption | TableOption[] | undefined,
   ) => {
     if (currentSchema) {
-      onTableSelectChange?.(
+      /*todo Kien cmt set default schema null*/
+     /* onTableSelectChange?.(
         Array.isArray(selectedOptions)
           ? selectedOptions.map(option => option?.value)
           : selectedOptions?.value,
         currentSchema,
-      );
+      );*/
     } else {
       setTableSelectValue(selectedOptions);
     }

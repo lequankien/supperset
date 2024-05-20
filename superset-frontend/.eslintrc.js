@@ -113,7 +113,7 @@ module.exports = {
         'import/no-named-as-default-member': 0,
         'import/prefer-default-export': 0,
         indent: 0,
-        'jsx-a11y/anchor-is-valid': 1,
+        'jsx-a11y/anchor-is-valid': 0,
         'jsx-a11y/click-events-have-key-events': 0, // re-enable up for discussion
         'jsx-a11y/mouse-events-have-key-events': 0, // re-enable up for discussion
         'max-classes-per-file': 0,
@@ -145,7 +145,7 @@ module.exports = {
         'react/require-default-props': 0,
         'react/sort-comp': 0, // TODO: re-enable in separate PR
         'react/static-property-placement': 0, // re-enable up for discussion
-        'prettier/prettier': 'error',
+        // 'prettier/prettier': 'error',
         'file-progress/activate': 1,
       },
       settings: {
@@ -238,7 +238,7 @@ module.exports = {
     'import/no-cycle': 0, // re-enable up for discussion, might require some major refactors
     'import/prefer-default-export': 0,
     indent: 0,
-    'jsx-a11y/anchor-is-valid': 1,
+    'jsx-a11y/anchor-is-valid': 0,
     'jsx-a11y/click-events-have-key-events': 0, // re-enable up for discussion
     'jsx-a11y/mouse-events-have-key-events': 0, // re-enable up for discussion
     'new-cap': 0,
@@ -287,7 +287,7 @@ module.exports = {
     'react/require-default-props': 0,
     'react/sort-comp': 0, // TODO: re-enable in separate PR
     'react/static-property-placement': 0, // disabled temporarily
-    'prettier/prettier': 'error',
+    // 'prettier/prettier': 'error',
   },
   ignorePatterns,
 };

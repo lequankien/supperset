@@ -52,7 +52,8 @@ const app = (
             ReactRouterRoute={Route}
             stringifyOptions={{ encode: false }}
           >
-            <Menu data={menu} />
+            {/*todo kien cmt*/}
+            {/*<Menu data={menu} />*/}
           </QueryParamProvider>
         </BrowserRouter>
       </Provider>

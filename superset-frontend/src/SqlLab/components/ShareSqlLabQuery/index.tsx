@@ -99,19 +99,19 @@ const ShareSqlLabQuery = ({
   };
 
   const buildButton = (canShare: boolean) => {
-    const tooltip = canShare
-      ? t('Copy query link to your clipboard')
-      : t('Save the query to enable this feature');
-    return (
-      <Button buttonSize="small" tooltip={tooltip} disabled={!canShare}>
-        <StyledIcon
-          iconColor={
-            canShare ? theme.colors.primary.base : theme.colors.grayscale.base
-          }
-          iconSize="xl"
-        />
-        {t('Copy link')}
-      </Button>
+    // const tooltip = canShare
+    //   ? t('Copy query link to your clipboard')
+    //   : t('Save the query to enable this feature');
+    return (null
+      // <Button buttonSize="small" tooltip={tooltip} disabled={!canShare}>
+      //   <StyledIcon
+      //     iconColor={
+      //       canShare ? theme.colors.primary.base : theme.colors.grayscale.base
+      //     }
+      //     iconSize="xl"
+      //   />
+      //   {t('Copy link')}
+      // </Button>
     );
   };
 

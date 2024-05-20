@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import shortid from 'shortid';
 import rison from 'rison';
 import {
@@ -42,6 +43,7 @@ import { logEvent } from 'src/logger/actions';
 import { newQueryTabName } from '../utils/newQueryTabName';
 import getInitialState from '../reducers/getInitialState';
 import { rehydratePersistedState } from '../utils/reduxStateToLocalStorageHelper';
+import { apiUrl } from '../../../env';
 
 export const RESET_STATE = 'RESET_STATE';
 export const ADD_QUERY_EDITOR = 'ADD_QUERY_EDITOR';
@@ -108,7 +110,7 @@ export const CtasEnum = {
   TABLE: 'TABLE',
   VIEW: 'VIEW',
 };
-const ERR_MSG_CANT_LOAD_QUERY = t("The query couldn't be loaded");
+const ERR_MSG_CANT_LOAD_QUERY = t('The query couldn\'t be loaded');
 
 // a map of SavedQuery field names to the different names used client-side,
 // because for now making the names consistent is too complicated
@@ -193,7 +195,6 @@ export function estimateQueryCost(queryEditor) {
       sql: requestSql,
       template_params: JSON.parse(templateParams || '{}'),
     };
-
     return Promise.all([
       dispatch({ type: COST_ESTIMATE_STARTED, query: queryEditor }),
       SupersetClient.post({
@@ -237,16 +238,16 @@ export function startQuery(query) {
 }
 
 export function querySuccess(query, results) {
-  return function (dispatch) {
+  return function(dispatch) {
     const sqlEditorId = results?.query?.sqlEditorId;
     const sync =
       sqlEditorId &&
       !query.isDataPreview &&
       isFeatureEnabled(FeatureFlag.SQLLAB_BACKEND_PERSISTENCE)
         ? SupersetClient.put({
-            endpoint: encodeURI(`/tabstateview/${sqlEditorId}`),
-            postPayload: { latest_query_id: query.id },
-          })
+          endpoint: encodeURI(`/tabstateview/${sqlEditorId}`),
+          postPayload: { latest_query_id: query.id },
+        })
         : Promise.resolve();
 
     return sync
@@ -256,7 +257,7 @@ export function querySuccess(query, results) {
           addDangerToast(
             t(
               'An error occurred while storing the latest query id in the backend. ' +
-                'Please contact your administrator if this problem persists.',
+              'Please contact your administrator if this problem persists.',
             ),
           ),
         ),
@@ -265,14 +266,14 @@ export function querySuccess(query, results) {
 }
 
 export function queryFailed(query, msg, link, errors) {
-  return function (dispatch) {
+  return function(dispatch) {
     const sync =
       !query.isDataPreview &&
       isFeatureEnabled(FeatureFlag.SQLLAB_BACKEND_PERSISTENCE)
         ? SupersetClient.put({
-            endpoint: encodeURI(`/tabstateview/${query.sqlEditorId}`),
-            postPayload: { latest_query_id: query.id },
-          })
+          endpoint: encodeURI(`/tabstateview/${query.sqlEditorId}`),
+          postPayload: { latest_query_id: query.id },
+        })
         : Promise.resolve();
 
     const eventData = {
@@ -302,7 +303,7 @@ export function queryFailed(query, msg, link, errors) {
             addDangerToast(
               t(
                 'An error occurred while storing the latest query id in the backend. ' +
-                  'Please contact your administrator if this problem persists.',
+                'Please contact your administrator if this problem persists.',
               ),
             ),
           ),
@@ -331,7 +332,7 @@ export function requestQueryResults(query) {
 }
 
 export function fetchQueryResults(query, displayLimit) {
-  return function (dispatch) {
+  return function(dispatch) {
     dispatch(requestQueryResults(query));
 
     const queryParams = rison.encode({
@@ -360,7 +361,7 @@ export function fetchQueryResults(query, displayLimit) {
 }
 
 export function runQuery(query) {
-  return function (dispatch) {
+  return function(dispatch) {
     dispatch(startQuery(query));
     const postPayload = {
       client_id: query.id,
@@ -415,7 +416,7 @@ export function runQueryFromSqlEditor(
   ctas,
   ctasMethod,
 ) {
-  return function (dispatch, getState) {
+  return function(dispatch, getState) {
     const qe = getUpToDateQuery(getState(), queryEditor, queryEditor.id);
     const query = {
       dbId: qe.dbId,
@@ -437,13 +438,13 @@ export function runQueryFromSqlEditor(
 
 export function reRunQuery(query) {
   // run Query with a new id
-  return function (dispatch) {
+  return function(dispatch) {
     dispatch(runQuery({ ...query, id: shortid.generate() }));
   };
 }
 
 export function postStopQuery(query) {
-  return function (dispatch) {
+  return function(dispatch) {
     return SupersetClient.post({
       endpoint: '/api/v1/query/stop',
       body: JSON.stringify({ client_id: query.id }),
@@ -479,7 +480,7 @@ function migrateTable(table, queryEditorId, dispatch) {
         addWarningToast(
           t(
             'Unable to migrate table schema state to backend. Superset will retry ' +
-              'later. Please contact your administrator if this problem persists.',
+            'later. Please contact your administrator if this problem persists.',
           ),
         ),
       ),
@@ -497,7 +498,7 @@ function migrateQuery(queryId, queryEditorId, dispatch) {
         addWarningToast(
           t(
             'Unable to migrate query state to backend. Superset will retry later. ' +
-              'Please contact your administrator if this problem persists.',
+            'Please contact your administrator if this problem persists.',
           ),
         ),
       ),
@@ -509,7 +510,7 @@ export function migrateQueryEditorFromLocalStorage(
   tables,
   queries,
 ) {
-  return function (dispatch) {
+  return function(dispatch) {
     return SupersetClient.post({
       endpoint: '/tabstateview/',
       postPayload: { queryEditor },
@@ -543,7 +544,7 @@ export function migrateQueryEditorFromLocalStorage(
           addWarningToast(
             t(
               'Unable to migrate query editor state to backend. Superset will retry ' +
-                'later. Please contact your administrator if this problem persists.',
+              'later. Please contact your administrator if this problem persists.',
             ),
           ),
         ),
@@ -584,7 +585,7 @@ export function addQueryEditor(queryEditor) {
 }
 
 export function addNewQueryEditor() {
-  return function (dispatch, getState) {
+  return function(dispatch, getState) {
     const {
       sqlLab: { queryEditors, tabHistory, unsavedQueryEditor, databases },
       common,
@@ -604,8 +605,8 @@ export function addNewQueryEditor() {
     const warning = isFeatureEnabled(FeatureFlag.SQLLAB_BACKEND_PERSISTENCE)
       ? ''
       : t(
-          '-- Note: Unless you save your query, these tabs will NOT persist if you clear your cookies or change browsers.\n\n',
-        );
+        '-- Note: Unless you save your query, these tabs will NOT persist if you clear your cookies or change browsers.\n\n',
+      );
 
     const name = newQueryTabName(
       queryEditors?.map(qe => ({
@@ -628,7 +629,7 @@ export function addNewQueryEditor() {
 }
 
 export function cloneQueryToNewTab(query, autorun) {
-  return function (dispatch, getState) {
+  return function(dispatch, getState) {
     const state = getState();
     const { queryEditors, unsavedQueryEditor, tabHistory } = state.sqlLab;
     const sourceQueryEditor = {
@@ -651,11 +652,11 @@ export function cloneQueryToNewTab(query, autorun) {
 }
 
 export function setActiveQueryEditor(queryEditor) {
-  return function (dispatch) {
+  return function(dispatch) {
     const sync = isFeatureEnabled(FeatureFlag.SQLLAB_BACKEND_PERSISTENCE)
       ? SupersetClient.post({
-          endpoint: encodeURI(`/tabstateview/${queryEditor.id}/activate`),
-        })
+        endpoint: encodeURI(`/tabstateview/${queryEditor.id}/activate`),
+      })
       : Promise.resolve();
 
     return sync
@@ -666,7 +667,7 @@ export function setActiveQueryEditor(queryEditor) {
             addDangerToast(
               t(
                 'An error occurred while setting the active tab. Please contact ' +
-                  'your administrator.',
+                'your administrator.',
               ),
             ),
           );
@@ -713,7 +714,7 @@ export function setTables(tableSchemas) {
 }
 
 export function switchQueryEditor(queryEditor, displayLimit) {
-  return function (dispatch) {
+  return function(dispatch) {
     if (
       isFeatureEnabled(FeatureFlag.SQLLAB_BACKEND_PERSISTENCE) &&
       queryEditor &&
@@ -770,12 +771,12 @@ export function setActiveSouthPaneTab(tabId) {
 
 export function toggleLeftBar(queryEditor) {
   const hideLeftBar = !queryEditor.hideLeftBar;
-  return function (dispatch) {
+  return function(dispatch) {
     const sync = isFeatureEnabled(FeatureFlag.SQLLAB_BACKEND_PERSISTENCE)
       ? SupersetClient.put({
-          endpoint: encodeURI(`/tabstateview/${queryEditor.id}`),
-          postPayload: { hide_left_bar: hideLeftBar },
-        })
+        endpoint: encodeURI(`/tabstateview/${queryEditor.id}`),
+        postPayload: { hide_left_bar: hideLeftBar },
+      })
       : Promise.resolve();
 
     return sync
@@ -799,11 +800,11 @@ export function toggleLeftBar(queryEditor) {
 }
 
 export function removeQueryEditor(queryEditor) {
-  return function (dispatch) {
+  return function(dispatch) {
     const sync = isFeatureEnabled(FeatureFlag.SQLLAB_BACKEND_PERSISTENCE)
       ? SupersetClient.delete({
-          endpoint: encodeURI(`/tabstateview/${queryEditor.id}`),
-        })
+        endpoint: encodeURI(`/tabstateview/${queryEditor.id}`),
+      })
       : Promise.resolve();
 
     return sync
@@ -821,7 +822,7 @@ export function removeQueryEditor(queryEditor) {
 }
 
 export function removeAllOtherQueryEditors(queryEditor) {
-  return function (dispatch, getState) {
+  return function(dispatch, getState) {
     const { sqlLab } = getState();
     sqlLab.queryEditors?.forEach(otherQueryEditor => {
       if (otherQueryEditor.id !== queryEditor.id) {
@@ -832,13 +833,13 @@ export function removeAllOtherQueryEditors(queryEditor) {
 }
 
 export function removeQuery(query) {
-  return function (dispatch) {
+  return function(dispatch) {
     const sync = isFeatureEnabled(FeatureFlag.SQLLAB_BACKEND_PERSISTENCE)
       ? SupersetClient.delete({
-          endpoint: encodeURI(
-            `/tabstateview/${query.sqlEditorId}/query/${query.id}`,
-          ),
-        })
+        endpoint: encodeURI(
+          `/tabstateview/${query.sqlEditorId}/query/${query.id}`,
+        ),
+      })
       : Promise.resolve();
 
     return sync
@@ -856,12 +857,12 @@ export function removeQuery(query) {
 }
 
 export function queryEditorSetDb(queryEditor, dbId) {
-  return function (dispatch) {
+  return function(dispatch) {
     const sync = isFeatureEnabled(FeatureFlag.SQLLAB_BACKEND_PERSISTENCE)
       ? SupersetClient.put({
-          endpoint: encodeURI(`/tabstateview/${queryEditor.id}`),
-          postPayload: { database_id: dbId },
-        })
+        endpoint: encodeURI(`/tabstateview/${queryEditor.id}`),
+        postPayload: { database_id: dbId },
+      })
       : Promise.resolve();
 
     return sync
@@ -879,14 +880,14 @@ export function queryEditorSetDb(queryEditor, dbId) {
 }
 
 export function queryEditorSetSchema(queryEditor, schema) {
-  return function (dispatch) {
+  return function(dispatch) {
     const sync =
       isFeatureEnabled(FeatureFlag.SQLLAB_BACKEND_PERSISTENCE) &&
       typeof queryEditor === 'object'
         ? SupersetClient.put({
-            endpoint: encodeURI(`/tabstateview/${queryEditor.id}`),
-            postPayload: { schema },
-          })
+          endpoint: encodeURI(`/tabstateview/${queryEditor.id}`),
+          postPayload: { schema },
+        })
         : Promise.resolve();
 
     return sync
@@ -910,12 +911,12 @@ export function queryEditorSetSchema(queryEditor, schema) {
 }
 
 export function queryEditorSetAutorun(queryEditor, autorun) {
-  return function (dispatch) {
+  return function(dispatch) {
     const sync = isFeatureEnabled(FeatureFlag.SQLLAB_BACKEND_PERSISTENCE)
       ? SupersetClient.put({
-          endpoint: encodeURI(`/tabstateview/${queryEditor.id}`),
-          postPayload: { autorun },
-        })
+        endpoint: encodeURI(`/tabstateview/${queryEditor.id}`),
+        postPayload: { autorun },
+      })
       : Promise.resolve();
 
     return sync
@@ -935,12 +936,12 @@ export function queryEditorSetAutorun(queryEditor, autorun) {
 }
 
 export function queryEditorSetTitle(queryEditor, name, id) {
-  return function (dispatch) {
+  return function(dispatch) {
     const sync = isFeatureEnabled(FeatureFlag.SQLLAB_BACKEND_PERSISTENCE)
       ? SupersetClient.put({
-          endpoint: encodeURI(`/tabstateview/${id}`),
-          postPayload: { label: name },
-        })
+        endpoint: encodeURI(`/tabstateview/${id}`),
+        postPayload: { label: name },
+      })
       : Promise.resolve();
 
     return sync
@@ -994,9 +995,9 @@ export const addSavedQueryToTabState =
   (queryEditor, savedQuery) => dispatch => {
     const sync = isFeatureEnabled(FeatureFlag.SQLLAB_BACKEND_PERSISTENCE)
       ? SupersetClient.put({
-          endpoint: `/tabstateview/${queryEditor.id}`,
-          postPayload: { saved_query_id: savedQuery.remoteId },
-        })
+        endpoint: `/tabstateview/${queryEditor.id}`,
+        postPayload: { saved_query_id: savedQuery.remoteId },
+      })
       : Promise.resolve();
 
     return sync
@@ -1034,7 +1035,7 @@ export function queryEditorSetSql(queryEditor, sql) {
 }
 
 export function queryEditorSetAndSaveSql(targetQueryEditor, sql) {
-  return function (dispatch, getState) {
+  return function(dispatch, getState) {
     const queryEditor = getUpToDateQuery(getState(), targetQueryEditor);
     // saved query and set tab state use this action
     dispatch(queryEditorSetSql(queryEditor, sql));
@@ -1047,8 +1048,8 @@ export function queryEditorSetAndSaveSql(targetQueryEditor, sql) {
           addDangerToast(
             t(
               'An error occurred while storing your query in the backend. To ' +
-                'avoid losing your changes, please save your query using the ' +
-                '"Save Query" button.',
+              'avoid losing your changes, please save your query using the ' +
+              '"Save Query" button.',
             ),
           ),
         ),
@@ -1059,12 +1060,12 @@ export function queryEditorSetAndSaveSql(targetQueryEditor, sql) {
 }
 
 export function queryEditorSetQueryLimit(queryEditor, queryLimit) {
-  return function (dispatch) {
+  return function(dispatch) {
     const sync = isFeatureEnabled(FeatureFlag.SQLLAB_BACKEND_PERSISTENCE)
       ? SupersetClient.put({
-          endpoint: encodeURI(`/tabstateview/${queryEditor.id}`),
-          postPayload: { query_limit: queryLimit },
-        })
+        endpoint: encodeURI(`/tabstateview/${queryEditor.id}`),
+        postPayload: { query_limit: queryLimit },
+      })
       : Promise.resolve();
 
     return sync
@@ -1088,7 +1089,7 @@ export function queryEditorSetQueryLimit(queryEditor, queryLimit) {
 }
 
 export function queryEditorSetTemplateParams(queryEditor, templateParams) {
-  return function (dispatch) {
+  return function(dispatch) {
     dispatch({
       type: QUERY_EDITOR_SET_TEMPLATE_PARAMS,
       queryEditor,
@@ -1096,9 +1097,9 @@ export function queryEditorSetTemplateParams(queryEditor, templateParams) {
     });
     const sync = isFeatureEnabled(FeatureFlag.SQLLAB_BACKEND_PERSISTENCE)
       ? SupersetClient.put({
-          endpoint: encodeURI(`/tabstateview/${queryEditor.id}`),
-          postPayload: { template_params: templateParams },
-        })
+        endpoint: encodeURI(`/tabstateview/${queryEditor.id}`),
+        postPayload: { template_params: templateParams },
+      })
       : Promise.resolve();
 
     return sync.catch(() =>
@@ -1106,7 +1107,7 @@ export function queryEditorSetTemplateParams(queryEditor, templateParams) {
         addDangerToast(
           t(
             'An error occurred while setting the tab template parameters. ' +
-              'Please contact your administrator.',
+            'Please contact your administrator.',
           ),
         ),
       ),
@@ -1123,7 +1124,7 @@ export function mergeTable(table, query, prepend) {
 }
 
 export function addTable(queryEditor, tableName, schemaName) {
-  return function (dispatch, getState) {
+  return function(dispatch, getState) {
     const query = getUpToDateQuery(getState(), queryEditor, queryEditor.id);
     const table = {
       dbId: query.dbId,
@@ -1146,7 +1147,7 @@ export function addTable(queryEditor, tableName, schemaName) {
 }
 
 export function runTablePreviewQuery(newTable) {
-  return function (dispatch, getState) {
+  return function(dispatch, getState) {
     const {
       sqlLab: { databases },
     } = getState();
@@ -1187,12 +1188,12 @@ export function runTablePreviewQuery(newTable) {
 }
 
 export function syncTable(table, tableMetadata) {
-  return function (dispatch) {
+  return function(dispatch) {
     const sync = isFeatureEnabled(FeatureFlag.SQLLAB_BACKEND_PERSISTENCE)
       ? SupersetClient.post({
-          endpoint: encodeURI('/tableschemaview/'),
-          postPayload: { table: { ...tableMetadata, ...table } },
-        })
+        endpoint: encodeURI('/tableschemaview/'),
+        postPayload: { table: { ...tableMetadata, ...table } },
+      })
       : Promise.resolve({ json: { id: table.id } });
 
     return sync
@@ -1214,7 +1215,7 @@ export function syncTable(table, tableMetadata) {
           addDangerToast(
             t(
               'An error occurred while fetching table metadata. ' +
-                'Please contact your administrator.',
+              'Please contact your administrator.',
             ),
           ),
         ),
@@ -1227,7 +1228,7 @@ export function changeDataPreviewId(oldQueryId, newQuery) {
 }
 
 export function reFetchQueryResults(query) {
-  return function (dispatch) {
+  return function(dispatch) {
     const newQuery = {
       id: shortid.generate(),
       dbId: query.dbId,
@@ -1246,12 +1247,12 @@ export function reFetchQueryResults(query) {
 }
 
 export function expandTable(table) {
-  return function (dispatch) {
+  return function(dispatch) {
     const sync = isFeatureEnabled(FeatureFlag.SQLLAB_BACKEND_PERSISTENCE)
       ? SupersetClient.post({
-          endpoint: encodeURI(`/tableschemaview/${table.id}/expanded`),
-          postPayload: { expanded: true },
-        })
+        endpoint: encodeURI(`/tableschemaview/${table.id}/expanded`),
+        postPayload: { expanded: true },
+      })
       : Promise.resolve();
 
     return sync
@@ -1261,7 +1262,7 @@ export function expandTable(table) {
           addDangerToast(
             t(
               'An error occurred while expanding the table schema. ' +
-                'Please contact your administrator.',
+              'Please contact your administrator.',
             ),
           ),
         ),
@@ -1270,12 +1271,12 @@ export function expandTable(table) {
 }
 
 export function collapseTable(table) {
-  return function (dispatch) {
+  return function(dispatch) {
     const sync = isFeatureEnabled(FeatureFlag.SQLLAB_BACKEND_PERSISTENCE)
       ? SupersetClient.post({
-          endpoint: encodeURI(`/tableschemaview/${table.id}/expanded`),
-          postPayload: { expanded: false },
-        })
+        endpoint: encodeURI(`/tableschemaview/${table.id}/expanded`),
+        postPayload: { expanded: false },
+      })
       : Promise.resolve();
 
     return sync
@@ -1285,7 +1286,7 @@ export function collapseTable(table) {
           addDangerToast(
             t(
               'An error occurred while collapsing the table schema. ' +
-                'Please contact your administrator.',
+              'Please contact your administrator.',
             ),
           ),
         ),
@@ -1294,16 +1295,16 @@ export function collapseTable(table) {
 }
 
 export function removeTables(tables) {
-  return function (dispatch) {
+  return function(dispatch) {
     const tablesToRemove = tables?.filter(Boolean) ?? [];
     const sync = isFeatureEnabled(FeatureFlag.SQLLAB_BACKEND_PERSISTENCE)
       ? Promise.all(
-          tablesToRemove.map(table =>
-            SupersetClient.delete({
-              endpoint: encodeURI(`/tableschemaview/${table.id}`),
-            }),
-          ),
-        )
+        tablesToRemove.map(table =>
+          SupersetClient.delete({
+            endpoint: encodeURI(`/tableschemaview/${table.id}`),
+          }),
+        ),
+      )
       : Promise.resolve();
 
     return sync
@@ -1313,7 +1314,7 @@ export function removeTables(tables) {
           addDangerToast(
             t(
               'An error occurred while removing the table schema. ' +
-                'Please contact your administrator.',
+              'Please contact your administrator.',
             ),
           ),
         ),
@@ -1339,7 +1340,7 @@ export function persistEditorHeight(queryEditor, northPercent, southPercent) {
 }
 
 export function popStoredQuery(urlId) {
-  return function (dispatch) {
+  return function(dispatch) {
     return SupersetClient.get({ endpoint: `/kv/${urlId}` })
       .then(({ json }) =>
         dispatch(
@@ -1356,8 +1357,9 @@ export function popStoredQuery(urlId) {
       .catch(() => dispatch(addDangerToast(ERR_MSG_CANT_LOAD_QUERY)));
   };
 }
+
 export function popSavedQuery(saveQueryId) {
-  return function (dispatch) {
+  return function(dispatch) {
     return SupersetClient.get({
       endpoint: `/savedqueryviewapi/api/get/${saveQueryId}`,
     })
@@ -1372,8 +1374,9 @@ export function popSavedQuery(saveQueryId) {
       .catch(() => dispatch(addDangerToast(ERR_MSG_CANT_LOAD_QUERY)));
   };
 }
+
 export function popQuery(queryId) {
-  return function (dispatch) {
+  return function(dispatch) {
     return SupersetClient.get({
       endpoint: `/api/v1/query/${queryId}`,
     })
@@ -1391,8 +1394,9 @@ export function popQuery(queryId) {
       .catch(() => dispatch(addDangerToast(ERR_MSG_CANT_LOAD_QUERY)));
   };
 }
+
 export function popDatasourceQuery(datasourceKey, sql) {
-  return function (dispatch) {
+  return function(dispatch) {
     const QUERY_TEXT = t('Query');
     const datasetId = datasourceKey.split('__')[0];
 
@@ -1416,17 +1420,20 @@ export function popDatasourceQuery(datasourceKey, sql) {
         ),
       )
       .catch(() =>
-        dispatch(addDangerToast(t("The datasource couldn't be loaded"))),
+        dispatch(addDangerToast(t('The datasource couldn\'t be loaded'))),
       );
   };
 }
+
 export function createDatasourceStarted() {
   return { type: CREATE_DATASOURCE_STARTED };
 }
+
 export function createDatasourceSuccess(data) {
   const datasource = `${data.id}__table`;
   return { type: CREATE_DATASOURCE_SUCCESS, datasource };
 }
+
 export function createDatasourceFailed(err) {
   return { type: CREATE_DATASOURCE_FAILED, err };
 }
@@ -1435,9 +1442,35 @@ export function createDatasource(vizOptions) {
   return dispatch => {
     dispatch(createDatasourceStarted());
     const { dbId, schema, datasourceName, sql } = vizOptions;
+
+    const searchParams = new URLSearchParams(window.location.search);
+    const token = searchParams.get('token');
+    const projectId = searchParams.get('projectId');
+    const apiUrl = searchParams.get('apiUrl');
+/*    fetch(apiUrl + '/datasets',
+      {
+        method: 'POST', // *GET, POST, PUT, DELETE, etc.
+        mode: 'cors', // no-cors, *cors, same-origin
+        cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+        credentials: 'same-origin', // include, *same-origin, omit
+        headers: {
+          'Accept': 'application/json, application/xml, text/plain, text/html, *.*',
+          'Content-Type': 'multipart/form-data',
+          'authorization': 'Bearer ' + token,
+          'projectId': projectId,
+        },
+        redirect: 'follow', // manual, *follow, error
+        referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+        body: formData, // body data type must match "Content-Type" header
+      }).then((response) => {
+      response.json().then((result) => {
+        console.log(result.data);
+      });
+    });*/
     return SupersetClient.post({
+      // endpoint: 'url',
       endpoint: '/api/v1/dataset/',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json'},
       body: JSON.stringify({
         database: dbId,
         schema,
@@ -1449,8 +1482,62 @@ export function createDatasource(vizOptions) {
     })
       .then(({ json }) => {
         dispatch(createDatasourceSuccess(json));
-
-        return Promise.resolve(json);
+        const columns = json['data']['columns'].map(c => {return {COLUMN_NAME: c.column_name, DATA_TYPE: c.type}});
+        // call api vmlp
+        const bodyDataset = {
+          projectId: projectId,
+          datasetType: 2,
+          datasourceId: null,
+          schema,
+          database: dbId,
+          datasetName: datasourceName,
+          table_name: datasourceName,
+          versionName: '',
+          datasetSql: sql,
+          columns: JSON.stringify(columns)
+        };
+            fetch(apiUrl + '/datasets/superset',
+              {
+                method: 'POST', // *GET, POST, PUT, DELETE, etc.
+                mode: 'cors', // no-cors, *cors, same-origin
+                cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+                credentials: 'same-origin', // include, *same-origin, omit
+                headers: {
+                  'Accept': 'application/json',
+                  'Content-Type': 'application/json',
+                  'Authorization': 'Bearer ' + token,
+                  'projectId': projectId,
+                },
+                redirect: 'follow', // manual, *follow, error
+                referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+                body: JSON.stringify(bodyDataset), // body data type must match "Content-Type" header
+              }).then((response) => {
+              response.json().then((result) => {
+                console.log(result.data);
+              });
+            }).catch(error => {
+              getClientErrorObject(error).then(e => {
+                dispatch(addDangerToast(e.error));
+              });
+              dispatch(
+                createDatasourceFailed(
+                  t('An error occurred while creating the Dataset '+ datasourceName),
+                ),
+              );
+              return Promise.reject();
+            });
+        return Promise.resolve(json)
+          .catch(error => {
+            getClientErrorObject(error).then(e => {
+              dispatch(addDangerToast(e.error));
+            });
+            dispatch(
+              createDatasourceFailed(
+                t('An error occurred while creating the Dataset '+ datasourceName),
+              ),
+            );
+            return Promise.reject();
+          });
       })
       .catch(error => {
         getClientErrorObject(error).then(e => {
@@ -1458,7 +1545,7 @@ export function createDatasource(vizOptions) {
         });
         dispatch(
           createDatasourceFailed(
-            t('An error occurred while creating the data source'),
+            t('An error occurred while creating the Dataset '+ datasourceName),
           ),
         );
 

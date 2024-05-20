@@ -18,7 +18,7 @@
  */
 import React from 'react';
 import { t, useTheme, styled } from '@superset-ui/core';
-import Icons from 'src/components/Icons';
+// import Icons from 'src/components/Icons';
 import { DropdownButton } from 'src/components/DropdownButton';
 import Button from 'src/components/Button';
 import { DropdownButtonProps } from 'antd/lib/dropdown';
@@ -26,12 +26,14 @@ import { DropdownButtonProps } from 'antd/lib/dropdown';
 interface SaveDatasetActionButtonProps {
   setShowSave: (arg0: boolean) => void;
   overlayMenu: JSX.Element | null;
+  dataset: any
 }
 
 const SaveDatasetActionButton = ({
-  setShowSave,
-  overlayMenu,
-}: SaveDatasetActionButtonProps) => {
+                                   setShowSave,
+                                   overlayMenu,
+                              dataset
+                                 }: SaveDatasetActionButtonProps) => {
   const theme = useTheme();
 
   const StyledDropdownButton = styled(
@@ -41,9 +43,11 @@ const SaveDatasetActionButton = ({
       &:first-of-type {
         width: ${theme.gridUnit * 16}px;
       }
+
       font-weight: ${theme.gridUnit * 150};
       background-color: ${theme.colors.primary.light4};
       color: ${theme.colors.primary.dark1};
+
       &:nth-of-type(2) {
         &:before,
         &:hover:before {
@@ -51,35 +55,41 @@ const SaveDatasetActionButton = ({
         }
       }
     }
+
     span[name='caret-down'] {
       margin-left: ${theme.gridUnit * 1}px;
       color: ${theme.colors.primary.dark2};
     }
   `;
 
-  return !overlayMenu ? (
-    <Button
-      onClick={() => setShowSave(true)}
-      buttonStyle="primary"
-      css={{ width: theme.gridUnit * 25 }}
-    >
-      {t('Save')}
-    </Button>
-  ) : (
-    <StyledDropdownButton
-      onClick={() => setShowSave(true)}
-      overlay={overlayMenu}
-      icon={
-        <Icons.CaretDown
-          iconColor={theme.colors.grayscale.light5}
-          name="caret-down"
-        />
-      }
-      trigger={['click']}
-    >
-      {t('Save')}
-    </StyledDropdownButton>
-  );
+  // return !overlayMenu ? (
+  //   <Button
+  //     onClick={() => setShowSave(true)}
+  //     buttonStyle="primary"
+  //     css={{ width: theme.gridUnit * 25 }}
+  //   >
+  //     {t('Save')}
+  //   </Button>
+  // ) : (
+  //   <StyledDropdownButton
+  //     onClick={() => setShowSave(true)}
+  //     overlay={overlayMenu}
+  //     icon={
+  //       <Icons.CaretDown
+  //         iconColor={theme.colors.grayscale.light5}
+  //         name="caret-down"
+  //       />
+  //     }
+  //     trigger={['click']}
+  //   >
+  //     {t('Save')}
+  //   </StyledDropdownButton>
+  // );
+  return <Button
+    onClick={() => dataset(true)}
+    buttonStyle='primary'
+    // css={{ width: theme.gridUnit * 25 }}
+  >   {t('Save dataset')}</Button>;
 };
 
 export default SaveDatasetActionButton;

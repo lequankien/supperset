@@ -187,6 +187,7 @@ const SaveQuery = ({
         <SaveDatasetActionButton
           setShowSave={setShowSave}
           overlayMenu={canExploreDatabase ? overlayMenu : null}
+          dataset={setShowSaveDatasetModal}
         />
       )}
       <SaveDatasetModal

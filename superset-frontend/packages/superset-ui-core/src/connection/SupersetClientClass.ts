@@ -90,6 +90,8 @@ export default class SupersetClientClass {
     );
     this.baseUrl = url.href.replace(/\/+$/, ''); // always strip trailing slash
     this.host = url.host;
+
+
     this.protocol = url.protocol as Protocol;
     this.headers = { Accept: 'application/json', ...headers }; // defaulting accept to json
     this.mode = mode;

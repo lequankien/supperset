@@ -34,6 +34,7 @@ describe('SaveDatasetActionButton', () => {
       <SaveDatasetActionButton
         setShowSave={() => true}
         overlayMenu={overlayMenu}
+        dataset={null}
       />,
     );
 
@@ -52,6 +53,7 @@ describe('SaveDatasetActionButton', () => {
       <SaveDatasetActionButton
         setShowSave={() => true}
         overlayMenu={overlayMenu}
+        dataset={null}
       />,
     );
 

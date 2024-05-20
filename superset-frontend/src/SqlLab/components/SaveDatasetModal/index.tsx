@@ -308,10 +308,10 @@ export const SaveDatasetModal = ({
       )
       .then((key: string) => {
         setLoading(false);
-        const url = mountExploreUrl(null, {
-          [URL_PARAMS.formDataKey.name]: key,
-        });
-        createWindow(url);
+        // const url = mountExploreUrl(null, {
+        //   [URL_PARAMS.formDataKey.name]: key,
+        // });
+        // createWindow(url);
         setDatasetName(getDefaultDatasetName());
         onHide();
       })
